@@ -1,0 +1,16 @@
+boto3==1.16.43
+botocore==1.19.43
+cached-property==1.5.2
+certifi==2020.12.5
+chardet==4.0.0
+CMRESHandler2==2.0.4
+ec2-metadata==2.3.0
+elasticsearch==7.10.1
+idna==2.10
+jmespath==0.10.0
+python-dateutil==2.8.1
+requests==2.25.1
+requests-aws4auth==1.0.1
+s3transfer==0.3.3
+six==1.15.0
+urllib3==1.26.2

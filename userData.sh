@@ -1,13 +1,13 @@
 #!/bin/bash
 yum update -y
 
-cd /home/ec2-user
-mkdir cleanupBucketDirectory
-cd cleanupBucketDirectory
+mkdir /home/ec2-user/cleanupBucketDirectory
+cd /home/ec2-user/cleanupBucketDirectory
 
-wget github.com/cleanupBucket.sh
-source cleanupBucket.env
+curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/cleanupBucket.sh -o cleanupBucket.sh
+curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/requirements.txt -o requirements.txt
 
+su -u ec2-user cleanupBucket.sh
 
 
 

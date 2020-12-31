@@ -133,6 +133,7 @@ def cleanupBucket(s3_client, bucket):
     for i in range(0, len(delete_marker_list), 1000):
         response = s3_client.delete_objects(
             Bucket=bucket,
+            
             Delete={
                 'Objects': delete_marker_list[i:i+1000],
                 'Quiet': True

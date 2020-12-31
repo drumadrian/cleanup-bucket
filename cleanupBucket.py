@@ -1,3 +1,4 @@
+
 from cmreslogging.handlers import CMRESHandler
 from ec2_metadata import ec2_metadata
 from requests_aws4auth import AWS4Auth
@@ -49,6 +50,7 @@ def setupConfig(config):
     config['AWS_SECRET_ACCESS_KEY']=credentials.secret_key
     config['AWS_SESSION_TOKEN']=credentials.token
 
+    
     try:
         print("\nAttempting to access EC2 Metadata")
         # print("ec2_metadata(type)={0}".format(type(ec2_metadata)) )
@@ -74,6 +76,7 @@ def setupConfig(config):
     except:
         print("\tFailed to retrieve EC2 metadata!")
 
+        
     try:
         print("\nAttempting to load Environment Variables")
         config['loggingLevel']=os.environ['loggingLevel']
@@ -109,8 +112,6 @@ def setupConfig(config):
     logging.basicConfig(stream=sys.stdout, level=loggingLevel)
 
     return config
-
-
 
 
 def cleanupBucket(s3_client, bucket):
@@ -151,7 +152,6 @@ def cleanupBucket(s3_client, bucket):
         log.info(response)
 
 
-
 ################################################################################################################
 ################################################################################################################
 #   LAMBDA HANDLER (Primary Execution Flow)
@@ -175,6 +175,7 @@ def lambda_handler(event, context):
     s3_client.delete_bucket(Bucket=bucket)
     log.info('Deleted bucket: {0} as requested!'.format(bucket) )
 
+    
 ################################################################################################################
 ################################################################################################################
 #   LAMBDA HANDLER 
@@ -182,11 +183,9 @@ def lambda_handler(event, context):
 ################################################################################################################
 
 
-
 ################################################################################################################
 # LOCAL TESTING and DEBUGGING  
 ################################################################################################################
-
 
 
 
@@ -196,9 +195,6 @@ if __name__ == "__main__":
     # if debug:
     #     print("\n event={0}\n".format(json.dumps(event)))
     lambda_handler(config,context)
-
-
-
 
 
 
@@ -224,6 +220,7 @@ if __name__ == "__main__":
 # https://stackoverflow.com/questions/52063174/list-tag-value-ec2-boto3
 # https://github.com/drumadrian/python-elasticsearch-logger
 # https://github.com/drumadrian/cleanup-bucket
+
 
 
 
@@ -257,7 +254,6 @@ if __name__ == "__main__":
 
 
 
-
                 # if tag['Key'] == deleteBucketTag
                 #     config['deleteBucket'] = True
                 # if tag['Value'] == deleteBucketTag
@@ -277,10 +273,6 @@ if __name__ == "__main__":
     # log.debug(json.dumps(event))
     # if context == "-": #RUNNING A LOCAL EXECUTION 
         # try:            
-
-
-
-
 
 
 

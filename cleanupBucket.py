@@ -129,6 +129,7 @@ def cleanupBucket(s3_client, bucket):
             for version in object_response_itr['Versions']:
                 version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})
 
+                
     for i in range(0, len(delete_marker_list), 1000):
         response = s3_client.delete_objects(
             Bucket=bucket,
@@ -140,6 +141,7 @@ def cleanupBucket(s3_client, bucket):
         print(response)
         log.info(response)
 
+        
     for i in range(0, len(version_list), 1000):
         response = s3_client.delete_objects(
             Bucket=bucket,

@@ -160,6 +160,7 @@ def cleanupBucket(s3_client, bucket):
 def lambda_handler(event, context): 
     config = setupConfig(event)
 
+    
     log = logging.getLogger("python_logger_cleanupBucket")
     log.info("cleaning up bucket - START")
     log.info("config={0}".format(config) )

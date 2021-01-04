@@ -1,5 +1,5 @@
 # cleanup-bucket
-Tools to cleanup an Amazon S3 bucket using Spot instances launched from the EC2 Console
+Tool to cleanup an Amazon S3 bucket using Spot instances launched from the EC2 Console
 
 
 
@@ -30,11 +30,10 @@ curl https://raw.githubusercontent.com/raspberrypi/linux/rpi-4.9.y/arch/arm/conf
 
 
 
-## Environment Variables")
-export loggingLevel=DEBUG
-config['loggingLevel'] = config['DEFAULT_loggingLevel']
-config['bucketName'] = config['DEFAULT_bucketName']
-config['deleteBucket'] = config['DEFAULT_deleteBucket']
-config['es_index_name'] = config['DEFAULT_es_index_name']
-config['environment'] = config['DEFAULT_environment']
-config['es_host'] = config['DEFAULT_es_host']
+## Environment Variables OR EC2 Tags")
+export logging_level
+export bucket_name
+export delete_bucket
+export es_index_name
+export environment
+export es_host

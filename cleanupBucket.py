@@ -44,7 +44,7 @@ def setupConfig(config):
     config['AWS_SECRET_ACCESS_KEY'] = credentials.secret_key
     config['AWS_SESSION_TOKEN'] = credentials.token
 
-    ec2 = boto3.resource('ec2')
+    ec2 = boto3.resource('ec2', region_name = config['region'])
 
     try:
         print("\nAttempting to access EC2 Metadata")

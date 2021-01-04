@@ -61,9 +61,20 @@ def detect_running_region():
 ################################################################################################################
 def setupConfig(config):
     # Try and Update config from Defaults using 2 sources 
-    # 1) EC2 metadata
-    # 2) Environment Variables
+    # 1) Environment Variables
+    # 2) EC2 metadata
     
+    try:
+        print("\nAttempting to load Environment Variables\n")
+        config['logging_level'] = os.getenv('logging_level', default = 'INFO')
+        config['bucket_name'] = os.getenv('bucket_name', default = 's3loadtest-storagebucket04df299d-6wyssbwsav39')
+        config['delete_bucket'] = os.getenv('delete_bucket', default = 'False')
+        config['es_index_name'] = os.getenv('es_index_name', default = 'python_logger_cleanupbucket')
+        config['environment'] = os.getenv('environment', default = 'Dev')
+        config['es_host'] = os.getenv('es_host', default = 'search-s3loadt-s3load-1jpqa7x5cpxfi-ayjuinlmhdse32gxc4ljr6agoa.us-west-2.es.amazonaws.com')
+    except Exception as ex:
+        print("\tFailed to retrieve Environment Variables!")
+
     try:
         config['region'] = detect_running_region()
     except Exception as ex:
@@ -72,18 +83,15 @@ def setupConfig(config):
 
     credentials = boto3.Session().get_credentials()
     awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, config['region'], 'ec2', session_token = credentials.token)
-
     config['AWS_ACCESS_KEY_ID'] = credentials.access_key
     config['AWS_SECRET_ACCESS_KEY'] = credentials.secret_key
     config['AWS_SESSION_TOKEN'] = credentials.token
-
     ec2 = boto3.resource('ec2', region_name = config['region'])
 
     try:
         print("\nAttempting to access EC2 Metadata")
         instance_id = ec2_metadata.instance_id
         ec2instance = ec2.Instance(instance_id)
-
         print("\nAttempting to access EC2 Tag data")
         # for instance in ec2.instances.all():
         print(ec2instance)
@@ -102,17 +110,6 @@ def setupConfig(config):
                 config['environment'] = tag['Value']
     except Exception as ex:
         print("\tFailed to retrieve EC2 Tag data!")
-
-    try:
-        print("\nAttempting to load Environment Variables\n")
-        config['logging_level'] = os.getenv('logging_level', default = 'INFO')
-        config['bucket_name'] = os.getenv('bucket_name', default = 's3loadtest-storagebucket04df299d-6wyssbwsav39')
-        config['delete_bucket'] = os.getenv('delete_bucket', default = 'False')
-        config['es_index_name'] = os.getenv('es_index_name', default = 'python_logger_cleanupbucket')
-        config['environment'] = os.getenv('environment', default = 'Dev')
-        config['es_host'] = os.getenv('es_host', default = 'search-s3loadt-s3load-1jpqa7x5cpxfi-ayjuinlmhdse32gxc4ljr6agoa.us-west-2.es.amazonaws.com')
-    except Exception as ex:
-        print("\tFailed to retrieve Environment Variables!")
 
     # SETUP LOGGING TO ELASTICSEARCH
     HOSTS=[{'host': config['es_host'], 'port': 443}]

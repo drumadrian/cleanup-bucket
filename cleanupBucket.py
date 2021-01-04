@@ -229,7 +229,7 @@ def lambda_handler(event, context):
 
     log = config['log']
     log.info("cleaning up bucket - START")
-    log.info("config={0}".format(config) )
+    # log.info("config={0}".format(config) )
 
     s3_client = boto3.client('s3')
     bucket = config['bucket_name']

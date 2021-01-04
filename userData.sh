@@ -9,7 +9,9 @@ curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/requiremen
 curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/cleanupBucket.py -o cleanupBucket.py
 curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/cleanupBucket.env -o cleanupBucket.env
 
-su -u ec2-user cleanupBucket.sh
+# sudo --user=ec2-user /home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh
+# su ec2-user bash -c "/home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh"
+runuser -l ec2-user -c 'bash -SHa /home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh'
 
 
 

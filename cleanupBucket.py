@@ -22,6 +22,7 @@ from cmreslogging.handlers import CMRESHandler
 from requests_aws4auth import AWS4Auth
 from ec2_metadata import ec2_metadata
 import logging
+import requests
 import boto3
 import json
 import sys

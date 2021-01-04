@@ -49,24 +49,39 @@ def setupConfig(config):
     config['AWS_SECRET_ACCESS_KEY'] = credentials.secret_key
     config['AWS_SESSION_TOKEN'] = credentials.token
 
+
+def get_instance_name(fid):
+
+    print("\nAttempting to access EC2 Metadata")
+    print("ec2_metadata(type)={0}".format(type(ec2_metadata)) )
+    print("\nec2_metadata={0}\n".format(ec2_metadata) )
+    instance_id = ec2_metadata.instance_id
+
+    # When given an instance ID as str e.g. 'i-1234567', return the instance 'Name' from the name tag.
+    # ec2 = boto3.resource('ec2')
+    ec2 = boto3.resource('ec2')
+    ec2instance = ec2.Instance(instance_id)
+    # for tags in ec2instance.tags:
+    #     if tags["Key"] == 'Name':
+    #         instancename = tags["Value"]
+
     try:
         print("\nAttempting to access EC2 Tag data")
-        ec2 = boto3.resource('ec2')
-        for instance in ec2.instances.all():
-            print (instance.tags)
-            for tag in instance.tags:
-                if tag['Key'] == 'logging_level':
-                    config['logging_level'] = tag['Value']
-                if tag['Key'] == 'bucket_name':
-                    config['bucket_name'] = tag['Value']
-                if tag['Key'] == 'delete_bucket':
-                    config['delete_bucket'] = tag['Value']
-                if tag['Key'] == 'es_host':
-                    config['es_host'] = tag['Value']
-                if tag['Key'] == 'es_index_name':
-                    config['es_index_name'] = tag['Value']
-                if tag['Key'] == 'environment':
-                    config['environment'] = tag['Value']
+        # for instance in ec2.instances.all():
+        print(ec2instance)
+        for tag in ec2instance.tags:
+            if tag['Key'] == 'logging_level':
+                config['logging_level'] = tag['Value']
+            if tag['Key'] == 'bucket_name':
+                config['bucket_name'] = tag['Value']
+            if tag['Key'] == 'delete_bucket':
+                config['delete_bucket'] = tag['Value']
+            if tag['Key'] == 'es_host':
+                config['es_host'] = tag['Value']
+            if tag['Key'] == 'es_index_name':
+                config['es_index_name'] = tag['Value']
+            if tag['Key'] == 'environment':
+                config['environment'] = tag['Value']
     except Exception as ex:
         print("\tFailed to retrieve EC2 Tag data!")
 

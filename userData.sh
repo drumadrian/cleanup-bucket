@@ -11,7 +11,7 @@ curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/cleanupBuc
 
 # sudo --user=ec2-user /home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh
 # su ec2-user bash -c "/home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh"
-runuser -l ec2-user -c 'bash -SHa /home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh'
+runuser -l ec2-user -c 'bash /home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh'
 
 
 

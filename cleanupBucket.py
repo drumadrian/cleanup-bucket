@@ -242,9 +242,9 @@ def lambda_handler(event, context):
 
     log.info("SUCCEEDED: cleanup bucket: {0}".format(bucket) )
 
-    # if config['delete_bucket'] == "True":
-    s3_client.delete_bucket(Bucket = bucket)
-    log.info('Deleted bucket: {0} as requested!'.format(bucket) )
+    if config['delete_bucket'] == "True":
+        s3_client.delete_bucket(Bucket = bucket)
+        log.info('Deleted bucket: {0} as requested!'.format(bucket) )
 
 ################################################################################################################
 ################################################################################################################

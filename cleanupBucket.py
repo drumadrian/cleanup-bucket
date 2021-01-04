@@ -28,11 +28,6 @@ import os
 
 
 ################################################################################################################
-#   DEFAULT Global Configuration
-################################################################################################################
-config = {}
-
-################################################################################################################
 #   Specific Configuration
 ################################################################################################################
 def setupConfig(config):
@@ -49,23 +44,13 @@ def setupConfig(config):
     config['AWS_SECRET_ACCESS_KEY'] = credentials.secret_key
     config['AWS_SESSION_TOKEN'] = credentials.token
 
-
-def get_instance_name(fid):
-
-    print("\nAttempting to access EC2 Metadata")
-    print("ec2_metadata(type)={0}".format(type(ec2_metadata)) )
-    print("\nec2_metadata={0}\n".format(ec2_metadata) )
-    instance_id = ec2_metadata.instance_id
-
-    # When given an instance ID as str e.g. 'i-1234567', return the instance 'Name' from the name tag.
-    # ec2 = boto3.resource('ec2')
     ec2 = boto3.resource('ec2')
-    ec2instance = ec2.Instance(instance_id)
-    # for tags in ec2instance.tags:
-    #     if tags["Key"] == 'Name':
-    #         instancename = tags["Value"]
 
     try:
+        print("\nAttempting to access EC2 Metadata")
+        instance_id = ec2_metadata.instance_id
+        ec2instance = ec2.Instance(instance_id)
+
         print("\nAttempting to access EC2 Tag data")
         # for instance in ec2.instances.all():
         print(ec2instance)
@@ -141,7 +126,7 @@ def cleanup_bucket_bulk(s3_client, bucket, log):
                 version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})
     
     log.info('DeleteMarkers and Versions lists created')
-    log.info('Proceeding to Cleanup Bucket {0}.  Ttems at a time= {0}'.format(config['bucket_name'], bulk_delete_count))
+    log.info('Proceeding to Cleanup Bucket {0}.  Ttems at a time= {0}'.format(bucket, bulk_delete_count))
 
     for item in range(0, len(delete_marker_list), bulk_delete_count):
         response = s3_client.delete_objects(
@@ -187,7 +172,7 @@ def cleanup_bucket_objects(s3_client, bucket, log):
                 version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})
     
     log.info('DeleteMarkers and Versions lists re-created')
-    log.info('Proceeding to Cleanup Bucket: {0}'.format(config['bucket_name']))
+    log.info('Proceeding to Cleanup Bucket: {0}'.format(bucket))
 
     for marker in delete_marker_list:
         response = s3_client.delete_object(Bucket = bucket, Key = marker)
@@ -239,15 +224,9 @@ def lambda_handler(event, context):
 ################################################################################################################
 # LOCAL TESTING and DEBUGGING  
 ################################################################################################################
-
-
-
-
 if __name__ == "__main__":
+    config = {}
     context = "-"
-    # event = config
-    # if debug:
-    #     print("\n event={0}\n".format(json.dumps(event)))
     lambda_handler(config,context)
 
 

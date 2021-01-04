@@ -14,6 +14,7 @@ References:
     https://stackoverflow.com/questions/52063174/list-tag-value-ec2-boto3
     https://github.com/drumadrian/python-elasticsearch-logger
     https://github.com/drumadrian/cleanup-bucket
+    https://stackoverflow.com/questions/37514810/how-to-get-the-region-of-the-current-user-from-boto/37519906
 
 """
 
@@ -27,6 +28,33 @@ import sys
 import os
 
 
+
+################################################################################################################
+#   Detect region
+################################################################################################################
+def detect_running_region():
+    """Dynamically determine the region from a running Glue job (or anything on EC2 for
+    that matter)."""
+    easy_checks = [
+        # check if set through ENV vars
+        os.environ.get('AWS_REGION'),
+        os.environ.get('AWS_DEFAULT_REGION'),
+        # else check if set in config or in boto already
+        boto3.DEFAULT_SESSION.region_name if boto3.DEFAULT_SESSION else None,
+        boto3.Session().region_name,
+    ]
+    for region in easy_checks:
+        if region:
+            return region
+
+    # else query an external service
+    # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
+    response = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document")
+    response_json = response.json()
+    return response_json.get('region')
+
+
+
 ################################################################################################################
 #   Specific Configuration
 ################################################################################################################
@@ -34,8 +62,12 @@ def setupConfig(config):
     # Try and Update config from Defaults using 2 sources 
     # 1) EC2 metadata
     # 2) Environment Variables
-    config['session'] = boto3.session.Session()
-    config['region'] = config['session'].region_name
+    
+    try:
+        config['region'] = detect_running_region()
+    except Exception as ex:
+        config['session'] = boto3.session.Session()
+        config['region'] = config['session'].region_name
 
     credentials = boto3.Session().get_credentials()
     awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, config['region'], 'ec2', session_token = credentials.token)

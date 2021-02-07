@@ -68,7 +68,7 @@ def setupConfig(config):
     try:
         print("\nAttempting to load Environment Variables\n")
         config['logging_level'] = os.getenv('logging_level', default = 'INFO')
-        config['bucket_name'] = os.getenv('bucket_name', default = 'default-bucket')
+        config['bucket_name'] = os.getenv('bucket_name', default = 'default-cleanup-bucket')
         config['delete_bucket'] = os.getenv('delete_bucket', default = 'False')
         config['es_index_name'] = os.getenv('es_index_name', default = 'python_logger_cleanupbucket')
         config['environment'] = os.getenv('environment', default = 'Dev')
@@ -136,7 +136,7 @@ def cleanup_bucket_bulk(s3_client, bucket, log):
                 version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})
     
     log.info('DeleteMarkers and Versions lists created')
-    log.info('Proceeding to Cleanup Bucket {0}.  Ttems at a time= {0}'.format(bucket, bulk_delete_count))
+    log.info('Proceeding to Cleanup Bucket {0}.  Items at a time= {1}'.format(bucket, bulk_delete_count))
 
     for item in range(0, len(delete_marker_list), bulk_delete_count):
         response = s3_client.delete_objects(
@@ -177,7 +177,7 @@ def cleanup_bucket_objects(s3_client, bucket, log):
             for version in object_response_itr['Versions']:
                 version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})
     
-    log.info('DeleteMarkers and Versions lists re-created')
+    log.info('DeleteMarkers list and Versions list created')
     log.info('Proceeding to Cleanup Bucket: {0}'.format(bucket))
 
     for marker in delete_marker_list:

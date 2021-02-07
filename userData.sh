@@ -16,7 +16,7 @@ curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/cleanupBuc
 ## Use Environment Variables 
 #################################################################
 export logging_level="INFO"
-export bucket_name="default-bucket"
+export bucket_name="default-cleanup-bucket"
 export delete_bucket="False"
 export es_index_name="python_logger_cleanupbucket"
 export environment="Dev"
@@ -32,10 +32,15 @@ echo "es_host=$es_host" >> /home/ec2-user/cleanupBucketDirectory/cleanupBucket.e
 
 
 #################################################################
+## install prerequisites
+#################################################################
+sudo yum install python3 -y
+source /home/ec2-user/cleanupBucketDirectory/cleanupBucket.env
+sudo pip3 install -r /home/ec2-user/cleanupBucketDirectory/requirements.txt
+printenv
+
+#################################################################
 ## Start the bucket cleanup script
 #################################################################
-runuser -l ec2-user -c 'bash /home/ec2-user/cleanupBucketDirectory/cleanupBucket.sh'
-
-
-
+python3 /home/ec2-user/cleanupBucketDirectory/cleanupBucket.py
 

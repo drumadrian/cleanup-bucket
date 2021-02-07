@@ -130,3 +130,5 @@ dmypy.json
 cleanup-bucket.code-workspace
 .vscode/launch.json
 .vscode/settings.json
+notes.sh
+notes2.txt

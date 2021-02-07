@@ -15,6 +15,7 @@ References:
     https://github.com/drumadrian/python-elasticsearch-logger
     https://github.com/drumadrian/cleanup-bucket
     https://stackoverflow.com/questions/37514810/how-to-get-the-region-of-the-current-user-from-boto/37519906
+    https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
 
 """
 
@@ -47,13 +48,10 @@ def detect_running_region():
     for region in easy_checks:
         if region:
             return region
-
     # else query an external service
-    # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
     response = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document")
     response_json = response.json()
     return response_json.get('region')
-
 
 
 ################################################################################################################
@@ -64,6 +62,9 @@ def setupConfig(config):
     # 1) Environment Variables
     # 2) EC2 metadata
     
+    ################################################################################################################
+    #   Environment Variables
+    ################################################################################################################
     try:
         print("\nAttempting to load Environment Variables\n")
         config['logging_level'] = os.getenv('logging_level', default = 'INFO')
@@ -81,37 +82,18 @@ def setupConfig(config):
         config['session'] = boto3.session.Session()
         config['region'] = config['session'].region_name
 
+    ################################################################################################################
+    #   GET AWS CREDENTIALS  LOGGING TO ELASTICSEARCH
+    ################################################################################################################
     credentials = boto3.Session().get_credentials()
     awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, config['region'], 'ec2', session_token = credentials.token)
     config['AWS_ACCESS_KEY_ID'] = credentials.access_key
     config['AWS_SECRET_ACCESS_KEY'] = credentials.secret_key
     config['AWS_SESSION_TOKEN'] = credentials.token
-    ec2 = boto3.resource('ec2', region_name = config['region'])
-
-    try:
-        print("\nAttempting to access EC2 Metadata")
-        instance_id = ec2_metadata.instance_id
-        ec2instance = ec2.Instance(instance_id)
-        print("\nAttempting to access EC2 Tag data")
-        # for instance in ec2.instances.all():
-        print(ec2instance)
-        for tag in ec2instance.tags:
-            if tag['Key'] == 'logging_level':
-                config['logging_level'] = tag['Value']
-            if tag['Key'] == 'bucket_name':
-                config['bucket_name'] = tag['Value']
-            if tag['Key'] == 'delete_bucket':
-                config['delete_bucket'] = tag['Value']
-            if tag['Key'] == 'es_host':
-                config['es_host'] = tag['Value']
-            if tag['Key'] == 'es_index_name':
-                config['es_index_name'] = tag['Value']
-            if tag['Key'] == 'environment':
-                config['environment'] = tag['Value']
-    except Exception as ex:
-        print("\tFailed to retrieve EC2 Tag data!")
-
-    # SETUP LOGGING TO ELASTICSEARCH
+    
+    ################################################################################################################
+    #   SETUP LOGGING TO ELASTICSEARCH
+    ################################################################################################################
     HOSTS=[{'host': config['es_host'], 'port': 443}]
     handler = CMRESHandler( hosts = HOSTS,
                             auth_type = CMRESHandler.AuthType.AWS_SIGNED_AUTH,
@@ -132,8 +114,6 @@ def setupConfig(config):
     logging.basicConfig(stream = sys.stdout, level = logging_level)
 
     return config
-
-
 
 
 ################################################################################################################
@@ -166,7 +146,6 @@ def cleanup_bucket_bulk(s3_client, bucket, log):
                 'Quiet': True
             }
         )
-        # print(response)
         log.info(response)
 
     for item in range(0, len(version_list), bulk_delete_count):
@@ -177,10 +156,7 @@ def cleanup_bucket_bulk(s3_client, bucket, log):
                 'Quiet': True
             }
         )
-        # print(response)
         log.info(response)
-
-
 
 
 ################################################################################################################
@@ -215,40 +191,40 @@ def cleanup_bucket_objects(s3_client, bucket, log):
         log.info(response)
 
 
-
 ################################################################################################################
 ################################################################################################################
 #   LAMBDA HANDLER (Primary Execution Flow)
 ################################################################################################################
 ################################################################################################################
 def lambda_handler(event, context): 
-    config = setupConfig(event)
 
+    ################################################################################################################
+    #   Setup configuration variables
+    ################################################################################################################
+    config = setupConfig(event)
     log = config['log']
     log.info("cleaning up bucket - START")
-    # log.info("config={0}".format(config) )
-
     s3_client = boto3.client('s3')
     bucket = config['bucket_name']
 
+    ################################################################################################################
+    #   Start Bucket cleanup
+    ################################################################################################################
     cleanup_bucket_bulk(s3_client, bucket, log)
     print("\nSUCCEEDED: cleanup bucket bulk: {0}\n".format(bucket) )
+    log.info("\nSUCCEEDED: cleanup bucket bulk: {0}\n".format(bucket) )
 
     cleanup_bucket_objects(s3_client, bucket, log)
     print("\nSUCCEEDED: cleanup bucket objects: {0}\n".format(bucket) )
-
     log.info("SUCCEEDED: cleanup bucket: {0}".format(bucket) )
 
+    ################################################################################################################
+    #   Delete bucket if configured
+    ################################################################################################################
     if config['delete_bucket'] == "True":
         s3_client.delete_bucket(Bucket = bucket)
+        print('Deleted bucket: {0} as requested!'.format(bucket) )
         log.info('Deleted bucket: {0} as requested!'.format(bucket) )
-
-################################################################################################################
-################################################################################################################
-#   LAMBDA HANDLER 
-################################################################################################################
-################################################################################################################
-
 
 
 ################################################################################################################
@@ -258,122 +234,3 @@ if __name__ == "__main__":
     config = {}
     context = "-"
     lambda_handler(config,context)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-################################################################################################################
-#   OLD CODE
-################################################################################################################
-
-
-    # Connect to Elasticsearch Service Domain
-    # service = 'es'
-    # credentials = boto3.Session().get_credentials()
-    # awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
-    # elasticsearchclient = Elasticsearch(
-    #     hosts = [{'host': ELASTICSEARCH_HOST, 'port': 443}],
-    #     http_auth = awsauth,
-    #     use_ssl = True,
-    #     verify_certs = True,
-    #     connection_class = RequestsHttpConnection
-    # )
-
-    # ELASTICSEARCH_HOST = os.environ['ELASTICSEARCH_HOST']
-    # AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID']
-    # AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY']
-    # AWS_SESSION_TOKEN=os.environ['AWS_SESSION_TOKEN']
-
-    # ELASTICSEARCH_HOST = os.environ['ELASTICSEARCH_HOST']
-    # AWS_ACCESS_KEY_ID=credentials.access_key
-    # AWS_SECRET_ACCESS_KEY=credentials.secret_key
-    # AWS_SESSION_TOKEN=credentials.token
-    # AWS_REGION='us-west-2'
-
-
-
-
-                # if tag['Key'] == delete_bucketTag
-                #     config['delete_bucket'] = True
-                # if tag['Value'] == delete_bucketTag
-                #     config['delete_bucket'] = True
-
-
-    # log.setLevel(logging.DEBUG)
-
-
-            # bucket = s3.Bucket('amazon-s3-bucket-load-test-storagebucket-7el453fxmzen')
-
-
-    # log.debug(json.dumps(event))
-    # log.debug(context)
-
-    # print("\n Lambda event={0}\n".format(json.dumps(event)))
-    # log.debug(json.dumps(event))
-    # if context == "-": #RUNNING A LOCAL EXECUTION 
-        # try:            
-
-
-# config['DEFAULT_logging_level'] = "INFO"
-# config['DEFAULT_bucket_name'] = "amazon-s3-bucket-load-test-storagebucket-7el453fxmzen"
-# config['DEFAULT_delete_bucket'] = "True"
-# config['DEFAULT_es_host'] = "search-s3loadt-s3load-1jpqa7x5cpxfi-ayjuinlmhdse32gxc4ljr6agoa.us-west-2.es.amazonaws.com"
-# config['DEFAULT_es_index_name'] = "python_logger_cleanupbucket"
-# config['DEFAULT_environment'] = "Dev"
-
-# config['debugTag'] = "debug"
-# config['bucket_nameTag'] = "bucket_name"
-# config['delete_bucketTag'] = "delete_bucket"
-# config['es_index_name'] = config['DEFAULT_es_index_name']
-
-
-
-# config['logging_level'] = config['DEFAULT_logging_level']
-# config['bucket_name'] = config['DEFAULT_bucket_name']
-# config['delete_bucket'] = config['DEFAULT_delete_bucket']
-# config['es_index_name'] = config['DEFAULT_es_index_name']
-# config['environment'] = config['DEFAULT_environment']
-# config['es_host'] = config['DEFAULT_es_host']
-
-
-
-
-# os.getenv('logging_level', default='INFO')
-# os.getenv('bucket_name', default='amazon-s3-bucket-load-test-storagebucket-7el453fxmzen')
-# os.getenv('delete_bucket', default='True')
-# os.getenv('es_index_name', default='python_logger_cleanupbucket')
-# os.getenv('environment', default='Dev')
-# os.getenv('es_host', default='search-s3loadt-s3load-1jpqa7x5cpxfi-ayjuinlmhdse32gxc4ljr6agoa.us-west-2.es.amazonaws.com')
-
-
-        # config['logging_level']=os.environ['logging_level']
-        # config['bucket_name']=os.environ['bucket_name']
-        # config['delete_bucket']=os.environ['delete_bucket']
-        # config['es_index_name']=os.environ['es_index_name']
-        # config['environment']=os.environ['environment']
-        # config['es_host']=os.environ['es_host']
-
-
-    # log = logging.getLogger("python_logger_cleanupBucket")
-
-
-
-        # print("ec2_metadata(type)={0}".format(type(ec2_metadata)) )
-        # print("\nec2_metadata={0}\n".format(ec2_metadata) )
-        # instanceID = ec2_metadata.instance_id
-        # Get Instance ID

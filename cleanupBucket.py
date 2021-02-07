@@ -68,11 +68,11 @@ def setupConfig(config):
     try:
         print("\nAttempting to load Environment Variables\n")
         config['logging_level'] = os.getenv('logging_level', default = 'INFO')
-        config['bucket_name'] = os.getenv('bucket_name', default = 's3loadtest-storagebucket04df299d-6wyssbwsav39')
+        config['bucket_name'] = os.getenv('bucket_name', default = 'default-bucket')
         config['delete_bucket'] = os.getenv('delete_bucket', default = 'False')
         config['es_index_name'] = os.getenv('es_index_name', default = 'python_logger_cleanupbucket')
         config['environment'] = os.getenv('environment', default = 'Dev')
-        config['es_host'] = os.getenv('es_host', default = 'search-s3loadt-s3load-1jpqa7x5cpxfi-ayjuinlmhdse32gxc4ljr6agoa.us-west-2.es.amazonaws.com')
+        config['es_host'] = os.getenv('es_host', default = 'elasticsearch-domain')
     except Exception as ex:
         print("\tFailed to retrieve Environment Variables!")
 
@@ -146,7 +146,7 @@ def cleanup_bucket_bulk(s3_client, bucket, log):
                 'Quiet': True
             }
         )
-        log.info(response)
+        log.debug(response)
 
     for item in range(0, len(version_list), bulk_delete_count):
         response = s3_client.delete_objects(
@@ -156,7 +156,7 @@ def cleanup_bucket_bulk(s3_client, bucket, log):
                 'Quiet': True
             }
         )
-        log.info(response)
+        log.debug(response)
 
 
 ################################################################################################################
@@ -183,12 +183,12 @@ def cleanup_bucket_objects(s3_client, bucket, log):
     for marker in delete_marker_list:
         response = s3_client.delete_object(Bucket = bucket, Key = marker)
         # print(response)
-        log.info(response)
+        log.debug(response)
 
     for version in version_list:
         response = s3_client.delete_object(Bucket = bucket, Key = version['Key'])
         # print(response)
-        log.info(response)
+        log.debug(response)
 
 
 ################################################################################################################

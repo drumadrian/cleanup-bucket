@@ -39,6 +39,8 @@ sudo pip3 install -r /home/ec2-user/cleanupBucketDirectory/requirements.txt
 
 #################################################################
 ## Start the bucket cleanup script
+# Recommended: 
+#       python3 /home/ec2-user/cleanupBucketDirectory/cleanupBucket.py >> cleanupBucket_output.txt
 #################################################################
 python3 /home/ec2-user/cleanupBucketDirectory/cleanupBucket.py
 

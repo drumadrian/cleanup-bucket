@@ -7,7 +7,6 @@ cd /home/ec2-user/cleanupBucketDirectory
 #################################################################
 ## Download files from GitHub
 #################################################################
-curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/cleanupBucket.sh -o cleanupBucket.sh
 curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/requirements.txt -o requirements.txt
 curl https://raw.githubusercontent.com/drumadrian/cleanup-bucket/main/cleanupBucket.py -o cleanupBucket.py
 
@@ -37,7 +36,6 @@ echo "es_host=$es_host" >> /home/ec2-user/cleanupBucketDirectory/cleanupBucket.e
 sudo yum install python3 -y
 source /home/ec2-user/cleanupBucketDirectory/cleanupBucket.env
 sudo pip3 install -r /home/ec2-user/cleanupBucketDirectory/requirements.txt
-printenv
 
 #################################################################
 ## Start the bucket cleanup script

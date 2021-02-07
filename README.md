@@ -1,7 +1,7 @@
 # Cleanup Bucket
 Cleanup bucket is a helpful tool to cleanup an Amazon S3 bucket using Spot instances.  It can be launched from the EC2 Console. 
 
-![]()
+![Cleanupbucket Diagram](cleanupbucket.png)
 
 ### Recommendations
 - Use an instance type similar to `r5n.xlarge` for Amazon S3 buckets containing many objects.  

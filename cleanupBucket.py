@@ -136,7 +136,7 @@ def cleanup_bucket_bulk(s3_client, bucket, log):
                 version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})
     
     log.info('DeleteMarkers and Versions lists created')
-    log.info('Proceeding to Cleanup Bucket {0}.  Items at a time= {1}'.format(bucket, bulk_delete_count))
+    log.info('Proceeding to Cleanup Bucket {0}.  Objects at a time={1}'.format(bucket, bulk_delete_count))
 
     for item in range(0, len(delete_marker_list), bulk_delete_count):
         response = s3_client.delete_objects(
@@ -178,16 +178,14 @@ def cleanup_bucket_objects(s3_client, bucket, log):
                 version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})
     
     log.info('DeleteMarkers list and Versions list created')
-    log.info('Proceeding to Cleanup Bucket: {0}'.format(bucket))
+    log.info('Proceeding to Cleanup REMAINING Bucket Objects: {0} 1 object at a time'.format(bucket))
 
     for marker in delete_marker_list:
         response = s3_client.delete_object(Bucket = bucket, Key = marker)
-        # print(response)
         log.debug(response)
 
     for version in version_list:
         response = s3_client.delete_object(Bucket = bucket, Key = version['Key'])
-        # print(response)
         log.debug(response)
 
 
@@ -211,19 +209,16 @@ def lambda_handler(event, context):
     #   Start Bucket cleanup
     ################################################################################################################
     cleanup_bucket_bulk(s3_client, bucket, log)
-    print("\nSUCCEEDED: cleanup bucket bulk: {0}\n".format(bucket) )
     log.info("\nSUCCEEDED: cleanup bucket bulk: {0}\n".format(bucket) )
 
     cleanup_bucket_objects(s3_client, bucket, log)
-    print("\nSUCCEEDED: cleanup bucket objects: {0}\n".format(bucket) )
-    log.info("SUCCEEDED: cleanup bucket: {0}".format(bucket) )
+    log.info("SUCCEEDED: cleanup bucket of remaining objects 1 at a time: {0}".format(bucket) )
 
     ################################################################################################################
     #   Delete bucket if configured
     ################################################################################################################
     if config['delete_bucket'] == "True":
         s3_client.delete_bucket(Bucket = bucket)
-        print('Deleted bucket: {0} as requested!'.format(bucket) )
         log.info('Deleted bucket: {0} as requested!'.format(bucket) )
 
 

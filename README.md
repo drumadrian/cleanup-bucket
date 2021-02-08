@@ -112,9 +112,12 @@ With:
 
 ### -Happy Cloud Computing-
 
-Video demonstration: 
+#### Video demonstration: 
 
 
+![Not loading? 👀 click the link below ⬇️](https://s3-us-west-2.amazonaws.com/files.adrianws.com/cleanupBucket.gif "Cleanup Bucket demonstration.... 👀")
 
-![Not loading? 👀](https://s3-us-west-2.amazonaws.com/files.adrianws.com/cleanupBucket.gif "Cleanup Bucket demonstration.... 👀")
+Screenshot:
+![Cleanup Bucket demonstration screenshot](cleanupBucket.gif.png)
 
+[https://s3-us-west-2.amazonaws.com/files.adrianws.com/cleanupBucket.gif](https://s3-us-west-2.amazonaws.com/files.adrianws.com/cleanupBucket.gif)

@@ -45,7 +45,7 @@ cd $DIR
 ## Download files from GitHub
 #################################################################
 curl $REPO/requirements.txt -o requirements.txt
-curl $REPO/requirements.txt -o cleanupBucket.py
+curl $REPO/cleanupBucket.py -o cleanupBucket.py
 
 
 #################################################################
@@ -71,6 +71,7 @@ pip3 install -r requirements.txt
 #       python3 $DIR/cleanupBucket.py >> $DIR/cleanupBucket_output.txt
 #################################################################
 python3 cleanupBucket.py
+
 
 
 

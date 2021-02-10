@@ -13,7 +13,7 @@ cd $DIR
 ## Download files from GitHub
 #################################################################
 curl $REPO/requirements.txt -o requirements.txt
-curl $REPO/requirements.txt -o cleanupBucket.py
+curl $REPO/cleanupBucket.py -o cleanupBucket.py
 
 
 #################################################################
